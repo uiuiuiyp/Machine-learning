@@ -13,7 +13,6 @@ import util
 
 TRAIN_DIR = 'training/'
 TEST_DIR  = 'validation/'
-INCEPTION_DIR = 'xception_weights_tf_dim_ordering_tf_kernels_notop.h5'
 BATCH_SIZE = 32
 
 def build_model_input():
@@ -42,7 +41,7 @@ def build_model_input():
                                                       class_mode='categorical')
 
     print("Import pretrained Inception module")
-    base_model = Xception(weights=INCEPTION_DIR,
+    base_model = Xception(weights='imagenet',
                           include_top=False,
                           input_shape=(height, width, channels))
 
