@@ -29,7 +29,11 @@ def build_model():
     
     model = keras.Sequential([
         keras.layers.Conv2D(32, (3,3),  input_shape=(28,28,1), activation=tf.nn.relu),
+        keras.layers.Conv2D(32, (3,3), activation=tf.nn.relu),
+        keras.layers.MaxPooling2D(pool_size=2),
         keras.layers.Conv2D(64, (3,3), activation=tf.nn.relu),
+        keras.layers.Conv2D(64, (3,3), activation=tf.nn.relu),
+        keras.layers.MaxPooling2D(pool_size=2),
         keras.layers.Flatten(),
         keras.layers.Dense(100, activation=tf.nn.relu),
         keras.layers.Dropout(0.5),
