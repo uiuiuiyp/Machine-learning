@@ -1,6 +1,6 @@
 ## 10 Monkey species
 
-_tags: visual recognition, deep learning_
+_tags: visual recognition, simple data augmentation_
 
 Based on: https://www.kaggle.com/slothkong/10-monkey-species
 
