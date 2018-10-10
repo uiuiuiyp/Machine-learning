@@ -13,22 +13,20 @@ class Model(object):
         session = tf.Session(config=config)
         self.sess = session
 
-    def build_model(self, input_shape, y_out):
-        
-        tf.reset_default_graph()
-        # Set input
-        self._set_input(input_shape)
-        # Set ouput (and graph)
+    def build_model(self, y_out):
+            
         self._set_output(y_out)
         # Define losses and optimizers
         self._add_training_vars()
 
-    def _set_input(self, input_shape):
+    def set_input(self, input_shape):
         """ 
         input: 
         - input_shape: shape of the input tensor
         """
         # Setup input
+        tf.reset_default_graph()
+
         width, height, channel = input_shape
         self.X = tf.placeholder(tf.float32, [None,  width, height, channel])
         self.y = tf.placeholder(tf.int64, [None])
