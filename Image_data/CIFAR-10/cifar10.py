@@ -41,32 +41,58 @@ def build_model_input(num_training=49000, num_validation=1000, num_test=10000):
 
 def build_model(input_shape):
     
-    print("Initialize model")
+    print("Build graph")
     model = Model(num_class=NUM_CLASS)
-    model.build_model(input_shape)
+    model.set_input(input_shape)
 
-    print("Building graph")
     input_layer = model.X
-
-    layer = tf.layers.conv2d(input_layer, 32, (3,3), strides=1, padding='valid', activation=tf.nn.relu)
-    layer = tf.layers.conv2d(layer, 32, (3,3), strides=1, padding='valid', activation=tf.nn.relu)
+    layer = tf.layers.conv2d(input_layer, 32, (3,3), strides=1, padding='same', activation=tf.nn.relu)
     layer = tf.layers.max_pooling2d(layer, 2, 2)
-
-    layer = tf.layers.conv2d(layer, 64, (3,3), strides=1, padding='valid', activation=tf.nn.relu)
-    layer = tf.layers.conv2d(layer, 64, (3,3), strides=1, padding='valid', activation=tf.nn.relu)
+    layer = inception_module(layer)
+    layer = inception_module(layer)
     layer = tf.layers.max_pooling2d(layer, 2, 2)
-    
+    layer = inception_module(layer)
+    layer = inception_module(layer)
+    layer = tf.layers.max_pooling2d(layer, 2, 2)
+    layer = inception_module(layer)
+    layer = inception_module(layer)
+    layer = tf.layers.average_pooling2d(layer, 4, 4)
+
     layer_dim = layer.shape
     layer_flat = tf.reshape(layer, [-1, tf.reduce_prod(layer_dim[1:])])
-    layer_flat = tf.layers.dense(layer_flat, 100, activation=tf.nn.relu)
-    layer_flat = tf.layers.dropout(layer_flat, rate=0.5, training=self.is_training)
+    print(layer_flat.shape)
+    layer_flat = tf.layers.dropout(layer_flat, rate=0.5, training=model.is_training)
+    layer_flat = tf.layers.dense(layer_flat, layer_flat.shape[1]//2, activation=tf.nn.relu)
 
     y_out = tf.layers.dense(layer_flat, 10)
 
-    # Set the output and ultimately determine the tensorflow graph
-    model.set_output(y_out)
+    # Define the tensorflow graph
+    model.build_model(y_out)
 
     return model
+
+def bottleneck(input_layer, channel):
+
+    return tf.layers.conv2d(input_layer, channel, (1,1), strides=1, padding='same')
+
+def inception_module(input_layer):
+
+    N, width, height, channel = input_layer.shape
+
+    layer_1x1  = bottleneck(input_layer, channel//3)
+    reduce_3x3 = bottleneck(input_layer, channel//2)
+    layer_3x3  = tf.layers.conv2d(reduce_3x3, channel//3*2, (3,3), strides=1, padding='same', activation=tf.nn.relu)
+    reduce_5x5 = bottleneck(input_layer, channel//12)
+    layer_5x5  = tf.layers.conv2d(reduce_5x5, channel//5, (5,5), strides=1, padding='same', activation=tf.nn.relu)
+    pooling    = tf.layers.max_pooling2d(input_layer, (3,3), strides=1, padding='same')
+    pool_proj  = bottleneck(pooling, channel//5)
+
+    output_layer = tf.concat([layer_1x1, layer_3x3, layer_5x5, pool_proj], axis=3)
+
+    print(layer_1x1.shape, layer_3x3.shape, layer_5x5.shape, pool_proj.shape)
+    # print(output_layer.shape)
+
+    return output_layer
 
 def train_model(model, x_train, y_train, num_epochs=1):
     
