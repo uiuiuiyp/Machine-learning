@@ -1,7 +1,5 @@
 ## Risk modeling
 
-_tags: classification, large dataset, relational database_
-
 Loan applications, as well as past loan application and payment histories, are used to asses the risk of default on new loans.
 
 Features: 
